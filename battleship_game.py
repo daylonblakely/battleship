@@ -49,22 +49,23 @@ def take_turn(this_player, opponent):
         print("Not even in the ocean, please enter values between 1 and 5")
         take_turn(this_player, opponent)
     #already guessed
-    elif (this_player.opponent_board[guess_row][guess_col] == "!") or (
-            this_player.opponent_board[guess_row][guess_col] == "X"):
+    elif (this_player.opponent_board[guess_row][guess_col] == "M") or (
+            this_player.opponent_board[guess_row][guess_col] == "H"):
         print("You guessed that one already!")
     #correct guess
     elif opponent.board[guess_row][guess_col] == "X":
         print("HIT!")
-        this_player.opponent_board[guess_row][guess_col] = "X"
+        this_player.opponent_board[guess_row][guess_col] = "H"
+        opponent.board[guess_row][guess_col] = "H"
         #check for winner, compare hits on this_player.opponent_board with opponent.board
-        if sum(x.count("X") for x in this_player.opponent_board) == sum(
-                x.count("X") for x in opponent.board):
+        if sum(x.count("X") for x in opponent.board) == 0:
             print(this_player.get_name() + " wins!")
             game_over = True
     #incorrect guess
     elif opponent.board[guess_row][guess_col] == "O":
         print("MISS!")
-        this_player.opponent_board[guess_row][guess_col] = "!"
+        this_player.opponent_board[guess_row][guess_col] = "M"
+        opponent.board[guess_row][guess_col] = "M"
 
 
 def main():
