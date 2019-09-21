@@ -27,7 +27,6 @@ class Player:
 
 def create_ships(Player):
     board = Player.board
-
     #randomly place 1X1 ship to player's board, try again if space is occupied
     ship_row = randint(0, len(board) - 1)
     ship_col = randint(0, len(board) - 1)
@@ -41,15 +40,20 @@ game_over = False
 def take_turn(this_player, opponent):
     global game_over
     this_player.print_board()
-    guess_row = int(input("Guess row:")) -1
-    guess_col = int(input("Guess col:")) -1
+    #loop to check for valid input
+    done = False
+    while not done:
+        try:
+            guess_row = int(input("Guess row:")) -1
+            guess_col = int(input("Guess col:")) -1
+            if (guess_row < 0 or guess_row > 4) or (guess_col < 0 or guess_col > 4):
+                raise
+            done = True
+        except:
+            print("INVALID INPUT! Please enter values between 1 and 5")
 
-    #check for invalid guess
-    if (guess_row < 0 or guess_row > 4) or (guess_col < 0 or guess_col > 4):
-        print("Not even in the ocean, please enter values between 1 and 5")
-        take_turn(this_player, opponent)
     #already guessed
-    elif (this_player.opponent_board[guess_row][guess_col] == "M") or (
+    if (this_player.opponent_board[guess_row][guess_col] == "M") or (
             this_player.opponent_board[guess_row][guess_col] == "H"):
         print("You guessed that one already!")
     #correct guess
