@@ -1,4 +1,6 @@
 import tkinter as tk
+from random import randint
+
 
 class Player:
     def __init__(self, name, root):
@@ -7,6 +9,7 @@ class Player:
         self.players_board = []
         for x in range(5):
             self.players_board.append(["O"] * 5)
+        self.create_ships()
         #create toplevel window for player's boards, use withdraw to hide the window when program starts
         self.win = tk.Toplevel(root)
         self.win.withdraw()
@@ -14,6 +17,18 @@ class Player:
         self.opponent_board = tk.Frame(self.win)
         self.board = tk.Frame(self.win)
         self.create_board()
+
+    def create_ships(self):
+        board = self.players_board
+        # randomly place 1X1 ship to player's board, try again if space is occupied
+        for x in range(3):
+            done = False
+            while not done:
+                ship_row = randint(0, len(board) - 1)
+                ship_col = randint(0, len(board) - 1)
+                if board[ship_row][ship_col] == "O":
+                    board[ship_row][ship_col] = "X"
+                    done = True
 
     #opens the players window from being withdrawn
     def open_window(self):
@@ -28,7 +43,7 @@ class Player:
         for x in range(5):
             for y in range(5):
                 btn = tk.Button(self.opponent_board, text="O", command=
-                lambda window=self.win, row=x, col=y: make_guess(window, row, col))
+                lambda window=self.win, frame=self.opponent_board, row=x, col=y: make_guess(window,frame, row, col))
                 btn.grid(row=x+1, column=y, sticky=tk.W, padx=2, pady=2)
 
         #Create players board
@@ -42,60 +57,63 @@ class Player:
             i += 1
 
 game_over = False
-guess_row = 0
-guess_col = 0
+player1 = None
+player2 = None
 
-def make_guess(window, x=0, y=0):
-    global guess_row
-    global guess_col
+def make_guess(window, f, x=0, y=0):
     print("{}, {}".format(x + 1, y + 1))
-    # set the global guess variables to the x and y
-    guess_row = x+1
-    guess_col = y+1
+    # set the global guess variables to the x and y and the frame to f
+    guess_row = x
+    guess_col = y
+    frame = f
     # hide the player's window after they make a guess
     window.withdraw()
+    take_turn(f, guess_row, guess_col)
 
-def take_turn(this_player, opponent):
+def take_turn(frame, guess_row, guess_col):
     global game_over
-    this_player.print_board()
-    #loop to check for valid input
-    done = False
-    while not done:
-        try:
-            guess_row = int(input("Guess row:")) -1
-            guess_col = int(input("Guess col:")) -1
-            if (guess_row < 0 or guess_row > 4) or (guess_col < 0 or guess_col > 4):
-                raise
-            done = True
-        except:
-            print("INVALID INPUT! Please enter values between 1 and 5")
+    # player one goes first
+    this_player = player1
+    opponent = player2
 
     #already guessed
-    if (this_player.opponent_board[guess_row][guess_col] == "M") or (
-            this_player.opponent_board[guess_row][guess_col] == "H"):
+    if (opponent.players_board[guess_row][guess_col] == "M") or (
+            opponent.players_board[guess_row][guess_col] == "H"):
         print("You guessed that one already!")
     #correct guess
-    elif opponent.board[guess_row][guess_col] == "X":
+    elif opponent.players_board[guess_row][guess_col] == "X":
         print("HIT!")
-        this_player.opponent_board[guess_row][guess_col] = "H"
-        opponent.board[guess_row][guess_col] = "H"
+        # changes the opponents board
+        opponent.players_board[guess_row][guess_col] = "H"
+        # change the players board
+        button = frame.grid_slaves(guess_row + 1)[guess_col]
+        button["text"] = "M"
         #check for winner, compare hits on this_player.opponent_board with opponent.board
-        if sum(x.count("X") for x in opponent.board) == 0:
-            print(this_player.get_name() + " wins!")
+        if sum(x.count("X") for x in opponent.players_board) == 0:
+            print(this_player.name + " wins!")
             game_over = True
     #incorrect guess
-    elif opponent.board[guess_row][guess_col] == "O":
+    elif opponent.players_board[guess_row][guess_col] == "O":
         print("MISS!")
-        this_player.opponent_board[guess_row][guess_col] = "M"
-        opponent.board[guess_row][guess_col] = "M"
+        opponent.players_board[guess_row][guess_col] = "M"
+        # change the players board
+        button = frame.grid_slaves(guess_row+1)[guess_col]
+        button["text"] = "M"
+
+    #switch the players at end of turn
+    this_player = player2
+    opponent = player1
 
 def main():
     root = tk.Tk()
     root.title("Battleship")
-    p1 = Player("Player 1", root)
-    p2 = Player("Player 2", root)
-    open_p1 = tk.Button(root, text="Open Player 1's Window", command=lambda player=p1: p1.open_window()).pack()
-    open_p2 = tk.Button(root, text="Open Player 2's Window", command=lambda player=p1: p2.open_window()).pack()
+    global player1
+    player1 = Player("Player 1", root)
+    global player2
+    player2 = Player("Player 2", root)
+    open_p1 = tk.Button(root, text="Open Player 1's Window", command=player1.open_window).pack()
+    open_p2 = tk.Button(root, text="Open Player 2's Window", command=player2.open_window).pack()
+
     root.mainloop()
 
 main()
