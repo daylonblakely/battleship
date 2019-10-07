@@ -43,7 +43,7 @@ class Player:
         for x in range(5):
             for y in range(5):
                 btn = tk.Button(self.opponent_board, text="O", command=
-                lambda window=self.win, frame=self.opponent_board, row=x, col=y: make_guess(window,frame, row, col))
+                lambda window=self.win, frame=self.opponent_board, row=x, col=y: make_guess(window, frame, row, col))
                 btn.grid(row=x+1, column=y, sticky=tk.W, padx=2, pady=2)
 
         #Create players board
@@ -57,8 +57,8 @@ class Player:
             i += 1
 
 game_over = False
-player1 = None
-player2 = None
+player_going = None
+player_not_going = None
 
 def make_guess(window, f, x=0, y=0):
     print("{}, {}".format(x + 1, y + 1))
@@ -72,45 +72,46 @@ def make_guess(window, f, x=0, y=0):
 
 def take_turn(frame, guess_row, guess_col):
     global game_over
-    # player one goes first
-    this_player = player1
-    opponent = player2
+    global player_going
+    global player_not_going
 
     #already guessed
-    if (opponent.players_board[guess_row][guess_col] == "M") or (
-            opponent.players_board[guess_row][guess_col] == "H"):
+    if (player_not_going.players_board[guess_row][guess_col] == "M") or (
+            player_not_going.players_board[guess_row][guess_col] == "H"):
         print("You guessed that one already!")
     #correct guess
-    elif opponent.players_board[guess_row][guess_col] == "X":
+    elif player_not_going.players_board[guess_row][guess_col] == "X":
         print("HIT!")
         # changes the opponents board
-        opponent.players_board[guess_row][guess_col] = "H"
+        player_not_going.players_board[guess_row][guess_col] = "H"
         # change the players board
-        button = frame.grid_slaves(guess_row + 1)[guess_col]
-        button["text"] = "M"
+        button = frame.grid_slaves(guess_row + 1)[4-guess_col]
+        button["text"] = "H"
         #check for winner, compare hits on this_player.opponent_board with opponent.board
-        if sum(x.count("X") for x in opponent.players_board) == 0:
-            print(this_player.name + " wins!")
+        if sum(x.count("X") for x in player_not_going.players_board) == 0:
+            print(player_going.name + " wins!")
             game_over = True
     #incorrect guess
-    elif opponent.players_board[guess_row][guess_col] == "O":
+    elif player_not_going.players_board[guess_row][guess_col] == "O":
         print("MISS!")
-        opponent.players_board[guess_row][guess_col] = "M"
+        player_not_going.players_board[guess_row][guess_col] = "M"
         # change the players board
-        button = frame.grid_slaves(guess_row+1)[guess_col]
+        button = frame.grid_slaves(guess_row+1)[4-guess_col]
         button["text"] = "M"
 
     #switch the players at end of turn
-    this_player = player2
-    opponent = player1
+    player_going, player_not_going = player_not_going, player_going
 
 def main():
     root = tk.Tk()
     root.title("Battleship")
-    global player1
     player1 = Player("Player 1", root)
-    global player2
     player2 = Player("Player 2", root)
+    global player_going
+    global player_not_going
+    #let player1 go first
+    player_going = player1
+    player_not_going = player2
     open_p1 = tk.Button(root, text="Open Player 1's Window", command=player1.open_window).pack()
     open_p2 = tk.Button(root, text="Open Player 2's Window", command=player2.open_window).pack()
 
