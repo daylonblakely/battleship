@@ -16,7 +16,8 @@ class Player:
         self.win.title("Battleship")
         self.opponent_board = tk.Frame(self.win)
         self.board = tk.Frame(self.win)
-        self.create_board()
+        self.create_opponent_board()
+        self.create_player_board()
 
     def create_ships(self):
         board = self.players_board
@@ -35,7 +36,7 @@ class Player:
         self.win.deiconify()
 
     #display the opponent's and player's board in the toplevel window
-    def create_board(self):
+    def create_opponent_board(self):
         #create opponent's board for guessing
         self.opponent_board.grid(row=0, column=0, sticky=tk.W, padx=15)
         tk.Label(self.opponent_board, text="Opponent's board").grid(row=0, column=0, columnspan=5, sticky=tk.W, pady=2)
@@ -45,7 +46,7 @@ class Player:
                 btn = tk.Button(self.opponent_board, text="O", command=
                 lambda window=self.win, frame=self.opponent_board, row=x, col=y: make_guess(window, frame, row, col))
                 btn.grid(row=x+1, column=y, sticky=tk.W, padx=2, pady=2)
-
+    def create_player_board(self):
         #Create players board
         self.board.grid(row=0, column=1, sticky=tk.W, padx=15)
         tk.Label(self.board, text=self.name + " board").grid(row=0, column=0, sticky=tk.W, pady=2)
@@ -65,7 +66,6 @@ def make_guess(window, f, x=0, y=0):
     # set the global guess variables to the x and y and the frame to f
     guess_row = x
     guess_col = y
-    frame = f
     # hide the player's window after they make a guess
     window.withdraw()
     take_turn(f, guess_row, guess_col)
@@ -82,8 +82,9 @@ def take_turn(frame, guess_row, guess_col):
     #correct guess
     elif player_not_going.players_board[guess_row][guess_col] == "X":
         print("HIT!")
-        # changes the opponents board
+        # changes the opponents board and update
         player_not_going.players_board[guess_row][guess_col] = "H"
+        player_not_going.create_player_board()
         # change the players board
         button = frame.grid_slaves(guess_row + 1)[4-guess_col]
         button["text"] = "H"
@@ -94,7 +95,9 @@ def take_turn(frame, guess_row, guess_col):
     #incorrect guess
     elif player_not_going.players_board[guess_row][guess_col] == "O":
         print("MISS!")
+        #change opponents board and update
         player_not_going.players_board[guess_row][guess_col] = "M"
+        player_not_going.create_player_board()
         # change the players board
         button = frame.grid_slaves(guess_row+1)[4-guess_col]
         button["text"] = "M"
