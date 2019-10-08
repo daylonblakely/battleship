@@ -66,15 +66,17 @@ def make_guess(player, window, f, x=0, y=0):
     print("{}, {}".format(x + 1, y + 1))
     global player_going
     global player_not_going
+    # make this player the player_going
     if player_going != player:
         player_going, player_not_going = player_not_going, player_going
 
     # set the global guess variables to the x and y and the frame to f
     guess_row = x
     guess_col = y
-    # hide the player's window after they make a guess
+    # hide the player's window after they make a guess and open opponents window
     window.withdraw()
     take_turn(f, guess_row, guess_col)
+    player_not_going.open_window()
 
 def take_turn(frame, guess_row, guess_col):
     global game_over
@@ -94,6 +96,7 @@ def take_turn(frame, guess_row, guess_col):
         # change the players board
         button = frame.grid_slaves(guess_row + 1)[4-guess_col]
         button["text"] = "H"
+        button["bg"] = "green"
         #check for winner, compare hits on this_player.opponent_board with opponent.board
         if sum(x.count("X") for x in player_not_going.players_board) == 0:
             print(player_going.name + " wins!")
@@ -107,17 +110,20 @@ def take_turn(frame, guess_row, guess_col):
         # change the players board
         button = frame.grid_slaves(guess_row+1)[4-guess_col]
         button["text"] = "M"
+        button["bg"] = "red"
 
 def main():
     root = tk.Tk()
     root.title("Battleship")
-    player1 = Player("Player 1", root)
-    player2 = Player("Player 2", root)
+
     global player_going
     global player_not_going
-    #let player1 go first
+    player1 = Player("Player 1", root)
+    player2 = Player("Player 2", root)
+    # let player1 go first
     player_going = player1
     player_not_going = player2
+
     open_p1 = tk.Button(root, text="Open Player 1's Window", command=player1.open_window).pack()
     open_p2 = tk.Button(root, text="Open Player 2's Window", command=player2.open_window).pack()
 
