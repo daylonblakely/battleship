@@ -44,7 +44,8 @@ class Player:
         for x in range(5):
             for y in range(5):
                 btn = tk.Button(self.opponent_board, text="O", command=
-                lambda window=self.win, frame=self.opponent_board, row=x, col=y: make_guess(window, frame, row, col))
+                lambda player=self, window=self.win, frame=self.opponent_board, row=x, col=y:
+                    make_guess(player, window, frame, row, col))
                 btn.grid(row=x+1, column=y, sticky=tk.W, padx=2, pady=2)
     def create_player_board(self):
         #Create players board
@@ -61,8 +62,13 @@ game_over = False
 player_going = None
 player_not_going = None
 
-def make_guess(window, f, x=0, y=0):
+def make_guess(player, window, f, x=0, y=0):
     print("{}, {}".format(x + 1, y + 1))
+    global player_going
+    global player_not_going
+    if player_going != player:
+        player_going, player_not_going = player_not_going, player_going
+
     # set the global guess variables to the x and y and the frame to f
     guess_row = x
     guess_col = y
@@ -101,9 +107,6 @@ def take_turn(frame, guess_row, guess_col):
         # change the players board
         button = frame.grid_slaves(guess_row+1)[4-guess_col]
         button["text"] = "M"
-
-    #switch the players at end of turn
-    player_going, player_not_going = player_not_going, player_going
 
 def main():
     root = tk.Tk()
