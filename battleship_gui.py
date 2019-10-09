@@ -4,7 +4,9 @@ from random import randint
 
 class Player:
     def __init__(self, name, root):
+        self.score = 0
         self.name = name
+        self.root = root
         #create player's board
         self.players_board = []
         for x in range(5):
@@ -76,7 +78,9 @@ def make_guess(player, window, f, x=0, y=0):
     # hide the player's window after they make a guess and open opponents window
     window.withdraw()
     take_turn(f, guess_row, guess_col)
-    player_not_going.open_window()
+    global game_over
+    if not game_over:
+        player_not_going.open_window()
 
 def take_turn(frame, guess_row, guess_col):
     global game_over
@@ -100,7 +104,12 @@ def take_turn(frame, guess_row, guess_col):
         #check for winner, compare hits on this_player.opponent_board with opponent.board
         if sum(x.count("X") for x in player_not_going.players_board) == 0:
             print(player_going.name + " wins!")
+            player_going.score += 1
             game_over = True
+            player_going.win.withdraw()
+            player_going.create_opponent_board()
+            player_not_going.create_opponent_board()
+            player_going.root.update()
     #incorrect guess
     elif player_not_going.players_board[guess_row][guess_col] == "O":
         print("MISS!")
@@ -126,6 +135,9 @@ def main():
 
     open_p1 = tk.Button(root, text="Open Player 1's Window", command=player1.open_window).pack()
     open_p2 = tk.Button(root, text="Open Player 2's Window", command=player2.open_window).pack()
+    play = tk.Button(root, text="Play", command=player1.open_window).pack()
+    p1 = tk.Label(root, text="Player 1 Score: "+str(player1.score)).pack()
+    p2 = tk.Label(root, text="Player 2 Score: " + str(player2.score)).pack()
 
     root.mainloop()
 
