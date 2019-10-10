@@ -9,8 +9,6 @@ class Player:
         self.root = root
         #create player's board
         self.players_board = []
-        for x in range(5):
-            self.players_board.append(["O"] * 5)
         self.create_ships()
         #create toplevel window for player's boards, use withdraw to hide the window when program starts
         self.win = tk.Toplevel(root)
@@ -22,15 +20,18 @@ class Player:
         self.create_player_board()
 
     def create_ships(self):
-        board = self.players_board
+        self.players_board = []
+        for x in range(5):
+            self.players_board.append(["O"] * 5)
         # randomly place 1X1 ship to player's board, try again if space is occupied
         for x in range(3):
             done = False
             while not done:
-                ship_row = randint(0, len(board) - 1)
-                ship_col = randint(0, len(board) - 1)
-                if board[ship_row][ship_col] == "O":
-                    board[ship_row][ship_col] = "X"
+                ship_row = randint(0, len(self.players_board) - 1)
+                ship_col = randint(0, len(self.players_board) - 1)
+                #ship_col = randint(0, len(board) - 1)
+                if self.players_board[ship_row][ship_col] == "O":
+                    self.players_board[ship_row][ship_col] = "X"
                     done = True
 
     #opens the players window from being withdrawn
@@ -81,6 +82,8 @@ def make_guess(player, window, f, x=0, y=0):
     global game_over
     if not game_over:
         player_not_going.open_window()
+    if game_over:
+        game_over = False
 
 def take_turn(frame, guess_row, guess_col):
     global game_over
@@ -106,9 +109,14 @@ def take_turn(frame, guess_row, guess_col):
             print(player_going.name + " wins!")
             player_going.score += 1
             game_over = True
+            #reset each player's boards so they can play again
             player_going.win.withdraw()
             player_going.create_opponent_board()
+            player_going.create_ships()
+            player_going.create_player_board()
             player_not_going.create_opponent_board()
+            player_not_going.create_ships()
+            player_not_going.create_player_board()
             player_going.root.update()
     #incorrect guess
     elif player_not_going.players_board[guess_row][guess_col] == "O":
